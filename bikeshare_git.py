@@ -15,7 +15,6 @@ def get_filters():
         (str) city - name of the city to analyze
         (str) month - name of the month to filter by, or "all" to apply no month filter
         (str) day - name of the day of week to filter by, or "all" to apply no day filter
-        Change here
     """
     print('Hello! Let\'s explore some US bikeshare data!')
     # get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
@@ -26,6 +25,7 @@ def get_filters():
         else:
             print("Invalid input. Please choose from Chicago, New York City, or Washington.")
 
+    # get user input for month (all, january, february, ... , june)
     while True:
         month = input("Which month? (all, January, February, March, April, May, June): ").lower()
         if month in ['january', 'february', 'march', 'april', 'may', 'june', 'all']:
@@ -33,6 +33,7 @@ def get_filters():
         else:
             print("Invalid input. Please choose a month between January and June, or 'all' for no filter.")
 
+    # get user input for day of week (all, monday, tuesday, ... sunday)
     while True:
         day = input(
             "Which day of the week? (all, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday): ").lower()
@@ -59,8 +60,10 @@ def load_data(city, month, day):
     # Load data file into a dataframe
     df = pd.read_csv(CITY_DATA[city])
 
+    # Convert the Start Time column to datetime and create 'month' and 'day_of_week' columns
     df['Start Time'] = pd.to_datetime(df['Start Time'])
 
+    # Apply filters directly while extracting relevant columns
     if month != 'all':
         month_numbers = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6}
         df = df[df['Start Time'].dt.month == month_numbers[month]]
@@ -84,13 +87,14 @@ def time_stats(df, month, day):
     start_time = time.time()
 
     if not df.empty:
-
+        # Most common month
         if month == "all" and 'Start Time' in df:
             common_month = df['Start Time'].dt.month.mode()[0]
             print(f"\nMost Common Month: {common_month}")
         else:
             print(f"\nFilter by Month: {month.capitalize()}")
 
+        # Most common day of the week
         if day == "all":
             common_day_of_week = df['Start Time'].dt.day_name().mode()[0]
             print(f"Most Common Day of Week: {common_day_of_week}")
@@ -108,6 +112,7 @@ def time_stats(df, month, day):
 
 
 def station_stats(df):
+    """Displays statistics on the most popular stations and trip."""
 
     print('\n' + '='*20 + ' Station Stats ' + '='*20)
     start_time = time.time()
@@ -135,6 +140,7 @@ def station_stats(df):
 
 
 def trip_duration_stats(df):
+    """Displays statistics on the total and average trip duration."""
 
     print('\n' + '='*20 + ' Trip Duration Stats ' + '='*20)
     start_time = time.time()
@@ -152,18 +158,18 @@ def trip_duration_stats(df):
 
 
 def user_stats(df):
-
+    """Displays statistics on bikeshare users."""
 
     print('\n' + '=' * 25 + ' User Stats ' + '=' * 25)
     start_time = time.time()
 
-
+    # Display counts of user types
     print('\nUser Types:')
     user_types = df['User Type'].value_counts()
     for user_type, count in user_types.items():
         print(f"  {user_type}: {count:,}")
 
-
+    # Display counts of gender (only if available in the dataset)
     if 'Gender' in df.columns:
         print('\nGender Counts:')
         gender_counts = df['Gender'].value_counts()
@@ -172,7 +178,7 @@ def user_stats(df):
     else:
         print("\nNo gender data available for this city.")
 
-
+    # Display earliest, most recent, and most common year of birth (only if available in the dataset)
     if 'Birth Year' in df.columns:
         print('\nYear of Birth Statistics:')
         earliest_year = int(df['Birth Year'].min())
@@ -191,22 +197,24 @@ def user_stats(df):
 def display_raw_data(df):
     """Displays raw data 5 rows at a time upon user request."""
 
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.width', None)
+    # Set options to display all columns
+    pd.set_option('display.max_columns', None)  # Show all columns
+    pd.set_option('display.width', None)        # Don't limit the width
 
     start_loc = 0
-
+    # Get the total number of rows in the dataframe
     total_rows = df.shape[0]
 
     while start_loc < total_rows:
-
+        # Prompt the user if they want to see raw data
         user_input = input(f"\nDo you want to see the next 5 rows of data? (yes or no): ").strip().lower()
         if user_input == 'yes':
-
+            # Display next 5 rows of data
             end_loc = min(start_loc + 5, total_rows)
             print(df.iloc[start_loc:end_loc])
             start_loc += 5
 
+            # Check if we reached the end of the dataframe
             if start_loc >= total_rows:
                 print("\nYou've reached the end of the data.")
                 break
@@ -216,6 +224,7 @@ def display_raw_data(df):
         else:
             print("Invalid input. Please enter 'yes' or 'no'.")
 
+    # Reset options to defaults
     pd.reset_option('display.max_columns')
     pd.reset_option('display.width')
 
